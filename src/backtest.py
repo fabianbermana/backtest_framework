@@ -32,9 +32,10 @@ class Backtest:
                 additional_data DataFrame must match the index of the total_return_indices DataFrame.
 
         Raises:
-            ValueError: if the index of total_return_indices is not a datetime index.
-            ValueError: if the index of total_return_indices is not sorted.
-            ValueError: if the index of total_return_indices and additional_data do not match.
+            ValueError: If the index of total_return_indices is not a datetime index.
+            ValueError: If the index of total_return_indices is not sorted.
+            ValueError: If the index of total_return_indices and additional_data do not match.
+            ValueError: If trader is not an instance of the Trader class.
         """        
     
         # check if index is a datetime index
@@ -49,6 +50,9 @@ class Backtest:
         if additional_data is not None:
             if ((total_return_indices.index != additional_data.index).any()): 
                 raise ValueError("Indices of total_return_indices and additional_data do not match.")
+
+        if not isinstance(trader, Trader):
+            raise ValueError("trader must be an instance of the Trader class.")
 
 
         self._total_return_indices: pd.DataFrame = total_return_indices
