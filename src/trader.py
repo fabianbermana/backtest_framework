@@ -1,0 +1,4 @@
+
+class trader():
+
+    pass
