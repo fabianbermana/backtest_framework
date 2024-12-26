@@ -10,12 +10,36 @@ class Results:
         total_return_indices: pd.DataFrame,
         portfolios: pd.DataFrame
     ):
-        self._total_return_indices = total_return_indices
-        self._portfolios = portfolios
+        """Class used to compute the performance of the portfolio.
+
+        Args:
+            total_return_indices (pd.DataFrame): total return indices of the assets in the portfolio.
+            portfolios (pd.DataFrame): weight of each asset in the portfolio at each time step.
+                must have the same columns as total_return_indices, and the same index, but less the last row.
+                This is because we compute the 1-period ahead returns of the portfolios to measure performance.
+
+        Raises:
+            ValueError: if the portfolios do not have the same columns as the total return indices.
+            ValueError: if the portfolios do not have the same index as the total return indices less the last row.
+        """
+
+        if (portfolios.columns != total_return_indices.columns).any():
+            raise ValueError("The portfolios must have the same columns as the total return indices.")
+
+        if (portfolios.index != total_return_indices.index[:-1]).any():
+            raise ValueError("The portfolios must have the same index as the total return indices, but less the last row.")
+
+        self._total_return_indices: pd.DataFrame = total_return_indices
+        self._portfolios: pd.DataFrame = portfolios
 
         self._get_returns()
 
     def _get_returns(self):
+        """Compute the single-period returns of the assets, then utilizes these along with
+        the portfolio weights to compute the single-period returns of the portfolios. Stores them
+        in the _asset_returns and _portfolio_returns attributes respectively.
+        """
+
         # compute the single-period percentage change of the total return indices
         self._asset_returns = self._total_return_indices.copy()
 
@@ -35,6 +59,8 @@ class Results:
         # compute the performance of the portfolio
         # by multiplying the total return indices with the portfolio weights
         # and summing the result
+
+        # TODO: Implement the computation of the portfolio performance measures
         portfolio_performance = None
 
         return portfolio_performance

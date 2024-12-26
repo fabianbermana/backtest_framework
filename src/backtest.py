@@ -1,6 +1,12 @@
 
 import pandas as pd
 from trader import Trader
+from results import Results
+
+class TraderPortfolioError(Exception):
+    def __init__(self, message):            
+        # Call the base class constructor with the parameters it needs
+        super().__init__(message)
 
 class Backtest:
 
@@ -61,7 +67,35 @@ class Backtest:
             index=total_return_indices.index[:self._max_time_idx]
         )
 
-    def run(self):
+    def run(self) -> Results:
+        """Carries out the backtest by iterating through the total return indices and additional data, providing
+        the trader with the market data and additional data up to time t at each iteration, and storing the portfolio 
+        weights at each time step. Returns the results of the backtest using the results.Results object._summary_
+
+        Raises:
+            TraderPortfolioError: if the trader output is not a DataFrame.
+            TraderPortfolioError: if the trader output does not have a single row.
+            TraderPortfolioError: if the trader output does not have the same columns as the total_return_indices.
+
+        Returns:
+            Results: the results of the backtest.
+        """
+
+        def _check_trader_output(trader_output: pd.DataFrame):
+            """Check the output of the trader to ensure it is a DataFrame with the same columns as the total_return_indices
+            and a single row. Raises a ValueError if the output is not as expected.
+
+            Args:
+                trader_output (pd.DataFrame): the output of the trader.
+            """
+            if not isinstance(trader_output, pd.DataFrame):
+                raise TraderPortfolioError("Trader output must be a DataFrame.")
+
+            if trader_output.shape[0] != 1:
+                raise TraderPortfolioError("Trader output must have only a single row, i.e. only for the current timestep.")
+
+            if not (trader_output.columns == self._total_return_indices.columns).all():
+                raise TraderPortfolioError("Trader output must have the same columns, i.e. assets as the total_return_indices.")
 
         while self._time_idx < self._max_time_idx:
             
@@ -75,22 +109,29 @@ class Backtest:
                 current_additional_data=self._current_additional_data
             )
 
+            _check_trader_output(current_portfolio)
+
             # store the current positions of the trader
             self._portfolios.iloc[self._time_idx,:] = current_portfolio.iloc[0,:]
 
             # increment the time index
             self._time_idx += 1
 
-        print(self._portfolios)
+        self._results = Results(
+            total_return_indices=self._total_return_indices,
+            portfolios=self._portfolios
+        )
+
+        return self._results
 
 
 if __name__ == "__main__":
 
     total_return_indices = pd.DataFrame(
         data = {
-            "date": ["2021-01-01", "2021-01-02", "2021-01-03"],
-            "sp500": [100, 101, 102],
-            "nasdaq": [100, 103, 106],
+            "date": ["2021-01-01", "2021-01-02", "2021-01-03", "2021-01-04", "2021-01-05", "2021-01-06"],
+            "sp500": [100, 101, 102, 103, 104, 105],
+            "nasdaq": [100, 103, 106, 109, 112, 115],
         }
     )
 
@@ -100,9 +141,9 @@ if __name__ == "__main__":
 
     additional_data = pd.DataFrame(
         data = {
-            "date": ["2021-01-01", "2021-01-02", "2021-01-03"],
-            "oil": [100, 99, 95],
-            "dxy": [100, 110, 92],
+            "date": ["2021-01-01", "2021-01-02", "2021-01-03", "2021-01-04", "2021-01-05", "2021-01-06"],
+            "oil": [100, 99, 95, 100, 105, 110],
+            "dxy": [100, 110, 92, 93, 97, 100],
         }
     )
 
@@ -118,4 +159,6 @@ if __name__ == "__main__":
         additional_data=additional_data
     )
 
-    backtest.run()
+    backtest_results = backtest.run()
+
+    print(backtest_results._portfolio_returns)
