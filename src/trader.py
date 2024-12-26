@@ -1,7 +1,7 @@
 
 import pandas as pd
 
-class Trader():
+class Trader:
 
     def __init__(self):
         pass

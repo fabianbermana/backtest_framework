@@ -2,7 +2,7 @@
 import pandas as pd
 from trader import Trader
 
-class Backtest():
+class Backtest:
 
     def __init__(
         self,
@@ -82,7 +82,6 @@ class Backtest():
             self._time_idx += 1
 
         print(self._portfolios)
-
 
 
 if __name__ == "__main__":
