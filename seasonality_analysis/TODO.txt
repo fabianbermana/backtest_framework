@@ -1,0 +1,5 @@
+
+- Add robustness / code warning to check whether all business days were included in the total return calculation (maybe just do a left join on returns, add warning if rownum increase due to several rows haaving same date)
+- Look at more time series: MSCI world, momentum, low vol returns. Expect factors to have different seasonality.
+- Quarter end, Year end effects, perhaps using STL decomposition
+- Add additinoal ratios: max drawdown, sortino
